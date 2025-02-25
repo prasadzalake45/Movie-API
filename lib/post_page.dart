@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'model.dart';
 import 'add_page.dart';
+import 'auth.dart';
 
 class PostPage extends StatefulWidget {
   @override
@@ -24,12 +25,21 @@ class _PostPageState extends State<PostPage> {
   // fetching the  data from API
   
   Future<void> fetchItems() async {
-   
 
-    final url = "https://192.168.1.115:7173/api/movies";
+    AuthService auth=AuthService();
+
+    String? token=await auth.getToken();
+
+    if(token==null){
+      print("user is not logged in");
+      return;
+    }
+    // String token= eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYTEiLCJuYmYiOjE3NDA0Nzc0MjAsImV4cCI6MTc0MDU2MzgyMCwiaWF0IjoxNzQwNDc3NDIwLCJpc3MiOiJGaXJzdEFwaSIsImF1ZCI6IkZpcnN0QXBpVXNlcnMifQ.REpWHbDjBXAxeWgz_2-AnmCFp4-g75E-ocb0BAMW8j8"
+
+    final url = "https://192.168.1.133:7173/api/Movies";
     final uri = Uri.parse(url);
 
-    final String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYSIsIm5iZiI6MTc0MDM3OTUxOCwiZXhwIjoxNzQwMzg2NzE4LCJpYXQiOjE3NDAzNzk1MTgsImlzcyI6IkZpcnN0QXBpIiwiYXVkIjoiRmlyc3RBcGlVc2VycyJ9.m7kJF1J6Z1ovvPimWuxkE3AVhJbXwQlcQwGjLok-EMg"; // Replace with actual token
+    // final String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYSIsIm5iZiI6MTc0MDQ2MTY1NCwiZXhwIjoxNzQwNTQ4MDU0LCJpYXQiOjE3NDA0NjE2NTQsImlzcyI6IkZpcnN0QXBpIiwiYXVkIjoiRmlyc3RBcGlVc2VycyJ9.DG8Ph0_-h0wq9Rp7QyfDVeaxItq5uP71F55-cdrXSko"; // Replace with actual token
 
     try {
       final response = await http.get(
@@ -76,15 +86,26 @@ class _PostPageState extends State<PostPage> {
 
    Future<void>navigateToEditPage(Map data) async{
     final route=MaterialPageRoute(
-      builder: (context)=>AddPage(),
+      builder: (context)=>AddPage(data:data),
     );
     await Navigator.push(context,route);
+    fetchItems();
   }
 
 
     // deleting items
 Future<void> deleteById(int id) async {
-  final url = 'https://192.168.1.115:7173/api/movies/$id';
+  // final String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYSIsIm5iZiI6MTc0MDQ2MTY1NCwiZXhwIjoxNzQwNTQ4MDU0LCJpYXQiOjE3NDA0NjE2NTQsImlzcyI6IkZpcnN0QXBpIiwiYXVkIjoiRmlyc3RBcGlVc2VycyJ9.DG8Ph0_-h0wq9Rp7QyfDVeaxItq5uP71F55-cdrXSko"; // Replace with actual token
+  AuthService auth=AuthService();
+
+  String? token=await auth.getToken();
+
+    if(token==null){
+      print("user is not logged in");
+      return;
+    }
+   
+  final url = 'https://192.168.1.133:7173/api/Movies/$id';
   final uri = Uri.parse(url);
 
   // **Remove from UI first for instant update**
@@ -95,9 +116,10 @@ Future<void> deleteById(int id) async {
   final response = await http.delete(
     uri,
     headers: {
-      'Authorization': "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYSIsIm5iZiI6MTc0MDM3OTUxOCwiZXhwIjoxNzQwMzg2NzE4LCJpYXQiOjE3NDAzNzk1MTgsImlzcyI6IkZpcnN0QXBpIiwiYXVkIjoiRmlyc3RBcGlVc2VycyJ9.m7kJF1J6Z1ovvPimWuxkE3AVhJbXwQlcQwGjLok-EMg",
+      "Authorization": "Bearer $token",
       'Content-Type': "application/json",
     },
+
   );
 
   if (response.statusCode == 204) {
@@ -111,70 +133,129 @@ Future<void> deleteById(int id) async {
 
 
   void showMessage(String message) {
-    final snackBar = SnackBar(content: Text(message));
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+       
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
 
   @override
-  Widget build(BuildContext context) {
+ Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          "Movies",
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 1.2,color: Colors.black),
+        ),
         centerTitle: true,
-        title: Text("Movies"),
+        elevation: 5,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.indigoAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.logout, color: Colors.white),
+        //     onPressed: () {},
+        //   ),
+        // ],
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: fetchItems,
               child: ListView.builder(
+                padding: EdgeInsets.all(12),
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final item = items[index];
                   final id = item['id'];
-                  return ListTile(
-                    leading: CircleAvatar(child: Text("${index + 1}")),
-                    title: Text("${item['title']}"),
-                    subtitle: Column(
-    crossAxisAlignment: CrossAxisAlignment.start, // Aligns text to the left
-    children: [
-      Text("${item['genre']}"),
-    
-     
-    ],
-  ),
-                  
-                    trailing: PopupMenuButton(
-                      onSelected: (value) {
-                        if (value == "edit") {
-                          // Navigate to edit page
-                        } else if (value == 'delete') {
-                          // Delete item
-                        deleteById(id);
-                        }
-                      },
-                      itemBuilder: (context) {
-                        return [
+
+                  return Card(
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.all(16),
+                      
+                      title: Text(
+                        item['title'],
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        item['genre'],
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      ),
+                      trailing: PopupMenuButton(
+                        onSelected: (value) {
+                          if (value == "edit") {
+                            navigateToEditPage(item);
+                          } else if (value == "delete") {
+                            deleteById(id);
+                          }
+                        },
+                        itemBuilder: (context) => [
                           PopupMenuItem(
-                            child: Text("Edit"),
-                            value: 'edit',
-                          ),
-                          PopupMenuItem(
-                            child: Text("Delete"),
-                            value: 'delete',
-                          ),
-                        ];
-                      },
+                            value: "edit",
+                          child: Row(children: [
+
+
+                            Icon(Icons.edit,color: Colors.blue),
+                            SizedBox(width: 8),
+                            Text("edit"),
+                          ],)
+                          
+                          ), 
+                          
+                          
+                   
+                           PopupMenuItem(
+                            value: "delete",
+                          child: Row(children: [
+
+
+                            Icon(Icons.delete,color: Colors.blue),
+                            SizedBox(width: 8),
+                            Text("delete"),
+                          ],)
+                          
+                          ), 
+
+                        ],
+                      ),
                     ),
                   );
                 },
               ),
             ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed:navigateToAddPage,
-        label: Text("Add Movies"),
+        onPressed: navigateToAddPage,
+        label: Text("Add Movie",
+        style: TextStyle(color: Colors.blue),
+        ),
+        icon: Icon(Icons.add),
       ),
     );
   }

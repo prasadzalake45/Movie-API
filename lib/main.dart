@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'post_page.dart';
+import 'login_screen.dart';
 
 
 import 'dart:io';
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
        
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home:PostPage(),
+      home:Login(),
     );
   }
 }
