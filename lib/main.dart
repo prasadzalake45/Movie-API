@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'post_page.dart';
 import 'login_screen.dart';
+import 'register.dart';
+import 'auth.dart';
 
 
 import 'dart:io';
@@ -13,14 +16,25 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-void main() {
+void main() async {
+    WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is ready
+
   HttpOverrides.global = MyHttpOverrides();
-  runApp(MyApp());
+  SharedPreferences prefs=await SharedPreferences.getInstance();
+  bool isLoggedIn=prefs.getBool("isLogged")??false;
+
+
+
+  runApp(MyApp(startScreen:isLoggedIn?PostPage():Login()));
 }
 
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Widget startScreen;
+  const MyApp(
+    {super.key,
+    required this.startScreen,
+    });
 
   // This widget is the root of your application.
   @override
@@ -32,7 +46,7 @@ class MyApp extends StatelessWidget {
        
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home:Login(),
+      home:startScreen,
     );
   }
 }

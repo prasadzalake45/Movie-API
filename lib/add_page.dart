@@ -112,7 +112,7 @@ class _AddPageState extends State<AddPage> {
      print("Updating movie with ID: $id");
   print("Request Body: ${jsonEncode(body)}");
 
-    final url='https://192.168.1.133:7173/api/Movies/$id';
+    final url='https://192.168.1.95:7173/api/Movies/$id';
     final uri=Uri.parse(url);
 
      final response = await http.patch(
@@ -174,24 +174,17 @@ class _AddPageState extends State<AddPage> {
 
     // date format
 
-    String formattedReleaseDate;
-  try {
-    DateTime parsedDate = DateTime.parse(release); // Parse input date
-    formattedReleaseDate = DateFormat("yyyy-MM-dd").format(parsedDate); // Format it
-  } catch (e) {
-    showError("Invalid date format! Use YYYY-MM-DD.");
-    return; // Stop execution if date is invalid
-  }
+
 
 
     final body = {
       "title": title,
       "genre": genre,
-      "releaseDate": formattedReleaseDate, // Use formatted date
+      "releaseDate": release, // Use formatted date
     };
 
     // Submit data to server
-    final url = 'https://192.168.1.133:7173/api/Movies';
+    final url = 'https://192.168.1.95:7173/api/Movies';
     final uri = Uri.parse(url);
     final response = await http.post(
       uri,
@@ -273,6 +266,21 @@ class _AddPageState extends State<AddPage> {
           TextFormField(
             controller: releaseController,
             decoration: const InputDecoration(hintText: 'release date'),
+             onTap: () async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(), // Current date
+      firstDate: DateTime(2000), // Minimum date
+      lastDate: DateTime(2100), // Maximum date
+    );
+
+    if (pickedDate != null) {
+      String formattedDate = DateFormat("yyyy-MM-dd").format(pickedDate); // Format date
+      setState(() {
+        releaseController.text = formattedDate; // Set selected date to TextField
+      });
+    }}
+    
           ),
           const SizedBox(height: 80),
           ElevatedButton(

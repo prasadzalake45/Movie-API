@@ -1,3 +1,4 @@
+import 'package:api_in/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -5,6 +6,8 @@ import 'model.dart';
 import 'add_page.dart';
 import 'auth.dart';
 
+
+ AuthService auth=AuthService();
 class PostPage extends StatefulWidget {
   @override
   State<PostPage> createState() => _PostPageState();
@@ -13,6 +16,8 @@ class PostPage extends StatefulWidget {
 class _PostPageState extends State<PostPage> {
   List items = [];
   bool isLoading = false;
+
+
 
   @override
   void initState() {
@@ -26,7 +31,7 @@ class _PostPageState extends State<PostPage> {
   
   Future<void> fetchItems() async {
 
-    AuthService auth=AuthService();
+  
 
     String? token=await auth.getToken();
 
@@ -36,7 +41,7 @@ class _PostPageState extends State<PostPage> {
     }
     // String token= eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYTEiLCJuYmYiOjE3NDA0Nzc0MjAsImV4cCI6MTc0MDU2MzgyMCwiaWF0IjoxNzQwNDc3NDIwLCJpc3MiOiJGaXJzdEFwaSIsImF1ZCI6IkZpcnN0QXBpVXNlcnMifQ.REpWHbDjBXAxeWgz_2-AnmCFp4-g75E-ocb0BAMW8j8"
 
-    final url = "https://192.168.1.133:7173/api/Movies";
+    final url = "https://192.168.1.95:7173/api/Movies";
     final uri = Uri.parse(url);
 
     // final String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYSIsIm5iZiI6MTc0MDQ2MTY1NCwiZXhwIjoxNzQwNTQ4MDU0LCJpYXQiOjE3NDA0NjE2NTQsImlzcyI6IkZpcnN0QXBpIiwiYXVkIjoiRmlyc3RBcGlVc2VycyJ9.DG8Ph0_-h0wq9Rp7QyfDVeaxItq5uP71F55-cdrXSko"; // Replace with actual token
@@ -105,7 +110,7 @@ Future<void> deleteById(int id) async {
       return;
     }
    
-  final url = 'https://192.168.1.133:7173/api/Movies/$id';
+  final url = 'https://192.168.1.95:7173/api/Movies/$id';
   final uri = Uri.parse(url);
 
   // **Remove from UI first for instant update**
@@ -153,6 +158,46 @@ Future<void> deleteById(int id) async {
 }
 
 
+// delete dialog box
+
+
+void showDeleteDialog(BuildContext context,int id) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Confirm Delete"),
+        content: Text("Are you sure you want to delete this item?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              deleteById(id);// Close dialog
+              Navigator.of(context).pop() ;// Perform delete action
+            },
+            child: Text("Delete", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+// logout functionlity
+
+void _logout() async{
+   await auth.logout();
+   Navigator.pushReplacement(context,
+   MaterialPageRoute(builder: (context)=>Login()) ,
+   );
+}
+
+
+
   @override
  Widget build(BuildContext context) {
     return Scaffold(
@@ -173,12 +218,12 @@ Future<void> deleteById(int id) async {
             ),
           ),
         ),
-        // actions: [
-        //   IconButton(
-        //     icon: Icon(Icons.logout, color: Colors.white),
-        //     onPressed: () {},
-        //   ),
-        // ],
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout, color: Colors.white),
+            onPressed: _logout,
+          ),
+        ],
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -213,7 +258,7 @@ Future<void> deleteById(int id) async {
                           if (value == "edit") {
                             navigateToEditPage(item);
                           } else if (value == "delete") {
-                            deleteById(id);
+                            showDeleteDialog(context,id);
                           }
                         },
                         itemBuilder: (context) => [

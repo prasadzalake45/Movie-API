@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'post_page.dart';
 import 'auth.dart';
-import 'register.dart';
+import 'login_screen.dart';
+import  'auth.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Register extends StatefulWidget {
+  const Register({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Register> createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends State<Register> {
 
+  
 
 
   final AuthService auth=AuthService();
@@ -32,27 +35,56 @@ class _LoginState extends State<Login> {
   String? _passwordError;
   bool _isValid = false;
 
+  void showError(String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.red,
+    );
 
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
-  void _login() async{
+  void _register() async{
     String username=_usernameController.text;
     String password=_passwordController.text;
+    int cnt=0;
+    if(username.isEmpty || password.isEmpty){
+      showError("username and passsword are required");
+      
 
-    bool success=await auth.login(username, password);
+    }
+   
+    
+    
+ 
+   if(username.isNotEmpty && password.isNotEmpty){
+     bool success=await auth.register(username, password);
 
+   
+   
+    print("success $success");
     if(success){
-       Navigator.pushReplacement(
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Register Sucessful!"),
+        
+      ));
+       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PostPage(),
+          builder: (context) => Login(),
         ), // Navigate if valid
       );
     }
     else{
+      cnt++;
+      print(cnt);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Login failed!"),
+        content: Text("Register failed!"),
+        
       ));
     }
+  }
   }
 
   // Validate Username in real-time
@@ -68,26 +100,26 @@ class _LoginState extends State<Login> {
   }
 
   // Validate Password in real-time
-  // void _validatePassword(String value) {
-  //   setState(() {
-  //     if (value.isEmpty) {
-  //       _passwordError = "Password cannot be empty";
-  //     } else if (value.length < 8) {
-  //       _passwordError = "Must be at least 8 characters";
-  //     } else if (!RegExp(r'[A-Z]').hasMatch(value)) {
-  //       _passwordError = "Must contain 1 uppercase letter";
-  //     } else if (!RegExp(r'[a-z]').hasMatch(value)) {
-  //       _passwordError = "Must contain 1 lowercase letter";
-  //     } else if (!RegExp(r'\d').hasMatch(value)) {
-  //       _passwordError = "Must contain 1 digit";
-  //     } else if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
-  //       _passwordError = "Must contain 1 special character";
-  //     } else {
-  //       _passwordError = null;
-  //     }
-  //     _updateFormValidity(); // Call this after validation
-  //   });
-  // }
+  void _validatePassword(String value) {
+    setState(() {
+      if (value.isEmpty) {
+        _passwordError = "Password cannot be empty";
+      } else if (value.length < 8) {
+        _passwordError = "Must be at least 8 characters";
+      } else if (!RegExp(r'[A-Z]').hasMatch(value)) {
+        _passwordError = "Must contain 1 uppercase letter";
+      } else if (!RegExp(r'[a-z]').hasMatch(value)) {
+        _passwordError = "Must contain 1 lowercase letter";
+      } else if (!RegExp(r'\d').hasMatch(value)) {
+        _passwordError = "Must contain 1 digit";
+      } else if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+        _passwordError = "Must contain 1 special character";
+      } else {
+        _passwordError = null;
+      }
+      _updateFormValidity(); // Call this after validation
+    });
+  }
 
   // Update form validity
   void _updateFormValidity() {
@@ -166,6 +198,7 @@ class _LoginState extends State<Login> {
                   border: OutlineInputBorder(),
                 ),
                 onChanged: _validateUsername,
+               
               ),
               SizedBox(height: 20.0),
               TextFormField(
@@ -175,6 +208,7 @@ class _LoginState extends State<Login> {
                   errorText: _passwordError,
                   border: OutlineInputBorder(),
                 ),
+                onChanged: _validatePassword,
                 
                 obscureText: true, // Hide password input
               ),
@@ -184,7 +218,8 @@ class _LoginState extends State<Login> {
 
 
               ElevatedButton(
-                onPressed:_login, // Disable button if invalid
+                onPressed:_register, // Disable button if invalid
+                
             
 
 
@@ -201,7 +236,7 @@ class _LoginState extends State<Login> {
                   
                 ),
 
-                child: Text("Login"),
+                child: Text("Register"),
 
              
 
@@ -209,16 +244,17 @@ class _LoginState extends State<Login> {
 
                 
               ),
-              SizedBox(height: 50),
-              TextButton(
+              SizedBox(height: 20), // Add spacing
+
+TextButton(
   onPressed: () {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => Register()), // Replace with actual login screen widget
+      MaterialPageRoute(builder: (context) => Login()), // Replace with actual login screen widget
     );
   },
   child: Text(
-    "Go back to Register",
+    "Already registered? Login",
     style: TextStyle(
       color: Colors.blue,
       fontSize: 16,
@@ -226,9 +262,13 @@ class _LoginState extends State<Login> {
     ),
   ),
 ),
+
             ],
+
+            
           ),
         ),
+        
       ),
     );
   }
