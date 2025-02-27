@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 
 
 class AuthService{
-  final String urll="https://192.168.1.95:7173/api/Auth/login";
-  final String urlR="https://192.168.1.95:7173/api/Auth/register";
+  final String urll="https://192.168.1.142:7173/api/Auth/login";
+  final String urlR="https://192.168.1.142:7173/api/Auth/register";
   // flutter secure storage
   final storage=FlutterSecureStorage();
 
@@ -26,7 +26,6 @@ class AuthService{
 
 
   }
-  // login functionality
 
 
   // register functionality
@@ -78,6 +77,9 @@ class AuthService{
 
 
   }
+
+    // login functionality
+
 
 Future<bool> login(String username, String password) async {
   try {

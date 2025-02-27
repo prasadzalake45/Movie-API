@@ -112,7 +112,7 @@ class _AddPageState extends State<AddPage> {
      print("Updating movie with ID: $id");
   print("Request Body: ${jsonEncode(body)}");
 
-    final url='https://192.168.1.95:7173/api/Movies/$id';
+    final url='https://192.168.1.142:7173/api/Movies/$id';
     final uri=Uri.parse(url);
 
      final response = await http.patch(
@@ -184,7 +184,7 @@ class _AddPageState extends State<AddPage> {
     };
 
     // Submit data to server
-    final url = 'https://192.168.1.95:7173/api/Movies';
+    final url = 'https://192.168.1.142:7173/api/Movies';
     final uri = Uri.parse(url);
     final response = await http.post(
       uri,
@@ -244,8 +244,42 @@ class _AddPageState extends State<AddPage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+
+  // dropdown menu
+
+  void showDropdown(BuildContext context,TextEditingController controller,List<String>options){
+    showMenu(
+      context:context ,
+      position: RelativeRect.fromLTRB(100, 200, 400, 200),
+
+      
+      items: options.map((String option){
+        return PopupMenuItem<String>(
+          value:option,
+          child:Text(option)
+          
+          
+          
+          );
+
+      }).toList(),
+
+      
+      
+      
+      ).then((value){
+        if(value!=null){
+          controller.text=value;
+        }
+      });
+
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    
+    List<String>options=["Action Thriller","Historical Epic","Romantic Drama","Comedy","Horror","Musical Drama","Biopic","Thrillers and Suspense"];
     return Scaffold(
      
       appBar: AppBar(title: Text(isEdit?"Edit Movies":"Add Movies")),
@@ -259,13 +293,29 @@ class _AddPageState extends State<AddPage> {
           ),
           const SizedBox(height: 50),
           TextFormField(
+            readOnly: true,
+
+            onTap: ()=>{
+              showDropdown(context,genreController,options),
+            },
+
             controller: genreController,
-            decoration: const InputDecoration(hintText: 'genre'),
+            decoration: const InputDecoration(
+              hintText: 'genre',
+              suffixIcon: Icon(Icons.arrow_drop_down),
+              ),
           ),
           const SizedBox(height: 80),
           TextFormField(
+              readOnly: true, 
             controller: releaseController,
-            decoration: const InputDecoration(hintText: 'release date'),
+            
+            decoration: const InputDecoration(
+              hintText: 'release date',
+              suffixIcon: Icon(Icons.calendar_today)
+              
+              
+              ),
              onTap: () async {
     DateTime? pickedDate = await showDatePicker(
       context: context,

@@ -41,6 +41,11 @@ class _LoginState extends State<Login> {
     bool success=await auth.login(username, password);
 
     if(success){
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Login Sucessful!"),
+        
+      ));
        Navigator.pushReplacement(
         context,
         MaterialPageRoute(

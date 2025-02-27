@@ -69,6 +69,7 @@ class _LoginState extends State<Register> {
         content: Text("Register Sucessful!"),
         
       ));
+      // need to do push replacement
        Navigator.push(
         context,
         MaterialPageRoute(
@@ -77,8 +78,7 @@ class _LoginState extends State<Register> {
       );
     }
     else{
-      cnt++;
-      print(cnt);
+     
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Register failed!"),
         

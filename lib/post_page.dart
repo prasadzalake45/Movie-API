@@ -2,6 +2,7 @@ import 'package:api_in/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'model.dart';
 import 'add_page.dart';
 import 'auth.dart';
@@ -41,7 +42,7 @@ class _PostPageState extends State<PostPage> {
     }
     // String token= eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYTEiLCJuYmYiOjE3NDA0Nzc0MjAsImV4cCI6MTc0MDU2MzgyMCwiaWF0IjoxNzQwNDc3NDIwLCJpc3MiOiJGaXJzdEFwaSIsImF1ZCI6IkZpcnN0QXBpVXNlcnMifQ.REpWHbDjBXAxeWgz_2-AnmCFp4-g75E-ocb0BAMW8j8"
 
-    final url = "https://192.168.1.95:7173/api/Movies";
+    final url = "https://192.168.1.142:7173/api/Movies";
     final uri = Uri.parse(url);
 
     // final String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYSIsIm5iZiI6MTc0MDQ2MTY1NCwiZXhwIjoxNzQwNTQ4MDU0LCJpYXQiOjE3NDA0NjE2NTQsImlzcyI6IkZpcnN0QXBpIiwiYXVkIjoiRmlyc3RBcGlVc2VycyJ9.DG8Ph0_-h0wq9Rp7QyfDVeaxItq5uP71F55-cdrXSko"; // Replace with actual token
@@ -57,7 +58,7 @@ class _PostPageState extends State<PostPage> {
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body); // Decode as list
-        
+        print(items);
         setState(() {
           items = jsonData;
           isLoading = false;
@@ -84,7 +85,7 @@ class _PostPageState extends State<PostPage> {
       builder: (context)=>AddPage(),
     );
     await Navigator.push(context,route);
-    fetchItems();
+    fetchItems();  // i am uable to understand why this fetch item doing again
   }
   
   // navigate to edit page
@@ -94,7 +95,7 @@ class _PostPageState extends State<PostPage> {
       builder: (context)=>AddPage(data:data),
     );
     await Navigator.push(context,route);
-    fetchItems();
+    fetchItems();  
   }
 
 
@@ -110,7 +111,7 @@ Future<void> deleteById(int id) async {
       return;
     }
    
-  final url = 'https://192.168.1.95:7173/api/Movies/$id';
+  final url = 'https://192.168.1.142:7173/api/Movies/$id';
   final uri = Uri.parse(url);
 
   // **Remove from UI first for instant update**
@@ -196,6 +197,13 @@ void _logout() async{
    );
 }
 
+// date parsing
+
+String formatDate(String dateString){
+  DateTime date=DateTime.parse(dateString); // convert string to datetime
+  return DateFormat("MMMM-dd-yyyy").format(date); // convert to whatever format that  i need
+}
+
 
 
   @override
@@ -207,7 +215,7 @@ void _logout() async{
           "Movies",
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 1.2,color: Colors.black),
         ),
-        centerTitle: true,
+        // centerTitle: true,
         elevation: 5,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -219,6 +227,7 @@ void _logout() async{
           ),
         ),
         actions: [
+          IconButton( icon: Icon(Icons.search),onPressed: (){},),
           IconButton(
             icon: Icon(Icons.logout, color: Colors.white),
             onPressed: _logout,
@@ -249,10 +258,21 @@ void _logout() async{
                         item['title'],
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text(
-                        item['genre'],
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                      ),
+                      subtitle: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        "Genre :${item['genre']}",
+        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+      ),
+      Text(
+
+     
+        "Release :${formatDate(item['releaseDate'])}", // Second subtitle (Example: Release Date)
+        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+      ),
+    ],
+  ),
                       trailing: PopupMenuButton(
                         onSelected: (value) {
                           if (value == "edit") {
