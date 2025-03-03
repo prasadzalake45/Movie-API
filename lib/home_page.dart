@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:api_in/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -18,6 +20,11 @@ class _PostPageState extends State<PostPage> {
   List items = [];
   bool isLoading = false;
 
+  final BASE_URL="https://192.168.1.10:7173/api/Movies";
+
+
+
+
 
 
   @override
@@ -32,6 +39,14 @@ class _PostPageState extends State<PostPage> {
   
   Future<void> fetchItems() async {
 
+
+    setState(() {
+  isLoading=true;  // shows loading indicator      
+
+
+
+    });
+
   
 
     String? token=await auth.getToken();
@@ -40,12 +55,10 @@ class _PostPageState extends State<PostPage> {
       print("user is not logged in");
       return;
     }
-    // String token= eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYTEiLCJuYmYiOjE3NDA0Nzc0MjAsImV4cCI6MTc0MDU2MzgyMCwiaWF0IjoxNzQwNDc3NDIwLCJpc3MiOiJGaXJzdEFwaSIsImF1ZCI6IkZpcnN0QXBpVXNlcnMifQ.REpWHbDjBXAxeWgz_2-AnmCFp4-g75E-ocb0BAMW8j8"
 
-    final url = "https://192.168.1.142:7173/api/Movies";
+    final url = BASE_URL;
     final uri = Uri.parse(url);
 
-    // final String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYSIsIm5iZiI6MTc0MDQ2MTY1NCwiZXhwIjoxNzQwNTQ4MDU0LCJpYXQiOjE3NDA0NjE2NTQsImlzcyI6IkZpcnN0QXBpIiwiYXVkIjoiRmlyc3RBcGlVc2VycyJ9.DG8Ph0_-h0wq9Rp7QyfDVeaxItq5uP71F55-cdrXSko"; // Replace with actual token
 
     try {
       final response = await http.get(
@@ -54,7 +67,9 @@ class _PostPageState extends State<PostPage> {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
-      );
+      ).timeout(Duration(seconds: 10)); // set timeout for request
+      
+      ;
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body); // Decode as list
@@ -64,11 +79,25 @@ class _PostPageState extends State<PostPage> {
           isLoading = false;
         });
       } else if (response.statusCode == 401) {
-        print("Unauthorized Access: Token may be invalid or expired");
-      } else {
+        showSnackbar("Unauthorized session expired,Please Log in");
+      } 
+      else if (response.statusCode == 500) {
+        showSnackbar("server error :please try again later");
+      } 
+      
+      
+      
+      else {
         print("Failed to fetch data: ${response.statusCode}");
       }
-    } catch (e) {
+    } on TimeoutException{
+      showSnackbar("Request Time out,check out internet connection"); // check out internet connection
+      print("check internet connection");
+    }
+    
+    
+    
+    catch (e) {
       print("Error: $e");
     } 
     
@@ -101,7 +130,6 @@ class _PostPageState extends State<PostPage> {
 
     // deleting items
 Future<void> deleteById(int id) async {
-  // final String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InNhbmlrYSIsIm5iZiI6MTc0MDQ2MTY1NCwiZXhwIjoxNzQwNTQ4MDU0LCJpYXQiOjE3NDA0NjE2NTQsImlzcyI6IkZpcnN0QXBpIiwiYXVkIjoiRmlyc3RBcGlVc2VycyJ9.DG8Ph0_-h0wq9Rp7QyfDVeaxItq5uP71F55-cdrXSko"; // Replace with actual token
   AuthService auth=AuthService();
 
   String? token=await auth.getToken();
@@ -111,13 +139,13 @@ Future<void> deleteById(int id) async {
       return;
     }
    
-  final url = 'https://192.168.1.142:7173/api/Movies/$id';
+  final url = '${BASE_URL}/$id';
   final uri = Uri.parse(url);
 
   // **Remove from UI first for instant update**
-  setState(() {
-    items.removeWhere((element) => element['id'] == id);
-  });
+  // setState(() {
+  //   items.removeWhere((element) => element['id'] == id);
+  // });
 
   final response = await http.delete(
     uri,
@@ -202,6 +230,19 @@ void _logout() async{
 String formatDate(String dateString){
   DateTime date=DateTime.parse(dateString); // convert string to datetime
   return DateFormat("MMMM-dd-yyyy").format(date); // convert to whatever format that  i need
+}
+
+// snackbar 
+
+void showSnackbar(String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      duration: Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating, // Floating snackbar
+      backgroundColor: Colors.redAccent, // Customize color
+    ),
+  );
 }
 
 

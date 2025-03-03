@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'post_page.dart';
+import 'home_page.dart';
 import 'login_screen.dart';
 import 'register.dart';
 import 'auth.dart';

@@ -2,137 +2,133 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
-
-
-class AuthService{
-  final String urll="https://192.168.1.142:7173/api/Auth/login";
-  final String urlR="https://192.168.1.142:7173/api/Auth/register";
+import 'error_messages.dart';
+class AuthService {
+  final String LOGIN_API = "https://192.168.1.10:7173/api/Auth/login";
+  final String REGISTER_API = "https://192.168.1.10:7173/api/Auth/register";
   // flutter secure storage
-  final storage=FlutterSecureStorage();
+  final storage = FlutterSecureStorage();
 
-  Future<void>saveUserData(String username,String password,String token) async{
+  Future<void> saveUserData(
+    String username,
+    String password,
+    String token,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
 
-    final prefs=await SharedPreferences.getInstance();
-    
     await prefs.setString(username, username); // username
     await prefs.setBool("isLogged", true);
 
-    await storage.write(key:"password",value:password); //password
-    await storage.write(key:"auth_token",value:token);  // token
-
-
-
-
-
+    await storage.write(key: "password", value: password); //password
+    await storage.write(key: "auth_token", value: token); // token
   }
-
 
   // register functionality
 
-  Future<bool>register(String username,String password) async{
+  Future<String> register(String username, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse(REGISTER_API),
 
-    try{
+        headers: {"Content-type": "application/json"},
 
-      final response=await http.post(
-        Uri.parse(urlR),
-
-        headers: {
-          "Content-type":"application/json",
-        
-
-        },
-
-        body:jsonEncode({
-          "username":username,
-          "password":password
-
-
-        }),
-
-
+        body: jsonEncode({"username": username, "password": password}),
       );
 
       print("user name is $username");
+      print("status code is ${response.statusCode}");
+      print("xxxxxxxxxxxxxxxxxxxxxxxxxx${response.body}");
 
-      if(response.statusCode==200 || response.statusCode==201){
-        final data=jsonDecode(response.body);
-        return true;
+      switch(response.statusCode){
 
-        print("the data is $data");
+        case 200:
+        case 201: // all ok something is created
+          print(response.body);
+           return "Username successfully created";
+
+        case 400:
+         return response.body;
+
+
+         case 409:
+         return response.body;
+
+         case 500:
+         return response.body;
+
+
+         default:
+         return response.body;
+
       }
-      else{
-        print("Something went Wrong ${response.statusCode}");
-      }
-
-
-
-    }
-    catch(e){
-      print("Error during login $e");
-
-    }
-
-    return false;
-
-
+      
+  
+    } catch (e) {
+    print("Error during registration: $e");
+    return "Network Error is Occured";
+  }
+   
   }
 
-    // login functionality
+  // login functionality
 
-
-Future<bool> login(String username, String password) async {
+  Future<String> login(String username, String password) async {
   try {
     final response = await http.post(
-      Uri.parse(urll),
+      Uri.parse(LOGIN_API),
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
       },
-      body: jsonEncode({
-        "username": username,
-        "password": password,
-      }),
+      body: jsonEncode({"username": username, "password": password}),
     );
 
     print("Response status code: ${response.statusCode}");
     print("Response body: ${response.body}");
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+    switch (response.statusCode) {
+      case 200:
+        final data = jsonDecode(response.body);
+        if (data != null && data["token"] is String) {
+          final token = data["token"];
+          await saveUserData(username, password, token);
+          return "Login Success"; // Return full response body
+        }
+        return "Invalid response from server.";
+        
+      case 401:
+        return response.body; // Unauthorized response body
+      
+      case 403:
+        return response.body; // Forbidden response body
+      
+      case 404:
+        return response.body; // Not found response body
+      
+      case 409:
+        return response.body; // Conflict response body
+      
+      case 503:
+        return response.body; // Service unavailable response body
 
-      // Ensure 'token' exists and is a String
-      if (data != null && data["token"] is String) {
-        final token = data["token"];
-        await saveUserData(username, password, token);
-        return true;
-      } else {
-        print("Error: Token is missing or invalid in API response.");
-      }
-    } else {
-      print("Login failed with status: ${response.statusCode}");
+      default:
+        return response.body; // Unknown error response body
     }
   } catch (e) {
-    print("Error during login: $e");
+    return "Network error: $e";
   }
-  return false;
 }
 
-  Future<String?>getToken() async{
-    return await storage.read(key:"auth_token");
-  }
 
+  Future<String?> getToken() async {
+    return await storage.read(key: "auth_token");
+  }
 
   // logout
 
-  Future<void>logout() async{
-    final prefs=await SharedPreferences.getInstance();
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
     await prefs.remove("username");
     await storage.deleteAll();
   }
-
-
-
-
-
 }
