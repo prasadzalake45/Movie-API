@@ -4,8 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'error_messages.dart';
 class AuthService {
-  final String LOGIN_API = "https://192.168.1.10:7173/api/Auth/login";
-  final String REGISTER_API = "https://192.168.1.10:7173/api/Auth/register";
+  final String LOGIN_API = "https://192.168.1.45:7173/api/Auth/login";
+  final String REGISTER_API = "https://192.168.1.45:7173/api/Auth/register";
   // flutter secure storage
   final storage = FlutterSecureStorage();
 

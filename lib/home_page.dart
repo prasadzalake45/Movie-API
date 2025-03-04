@@ -20,7 +20,7 @@ class _PostPageState extends State<PostPage> {
   List items = [];
   bool isLoading = false;
 
-  final BASE_URL="https://192.168.1.10:7173/api/Movies";
+  final BASE_URL="https://192.168.1.45:7173/api/Movies";
 
 
 
