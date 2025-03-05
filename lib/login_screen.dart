@@ -83,27 +83,6 @@ void _login() async {
     });
   }
 
-  // Validate Password in real-time
-  // void _validatePassword(String value) {
-  //   setState(() {
-  //     if (value.isEmpty) {
-  //       _passwordError = "Password cannot be empty";
-  //     } else if (value.length < 8) {
-  //       _passwordError = "Must be at least 8 characters";
-  //     } else if (!RegExp(r'[A-Z]').hasMatch(value)) {
-  //       _passwordError = "Must contain 1 uppercase letter";
-  //     } else if (!RegExp(r'[a-z]').hasMatch(value)) {
-  //       _passwordError = "Must contain 1 lowercase letter";
-  //     } else if (!RegExp(r'\d').hasMatch(value)) {
-  //       _passwordError = "Must contain 1 digit";
-  //     } else if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
-  //       _passwordError = "Must contain 1 special character";
-  //     } else {
-  //       _passwordError = null;
-  //     }
-  //     _updateFormValidity(); // Call this after validation
-  //   });
-  // }
 
   // Update form validity
   void _updateFormValidity() {
@@ -115,19 +94,7 @@ void _login() async {
     });
   }
 
-  // Login function
-  // void _login() {
-  //   String username=_usernameController.text.trim();
-  //       if (_isValid) {
-  //      _saveUsername(username);// stores username in Hive
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(
-  //         builder: (context) => PostPage(),
-  //       ), // Navigate if valid
-  //     );
-  //   }
-  // }
+ 
 
   @override
   Widget build(BuildContext context) {

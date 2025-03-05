@@ -125,12 +125,7 @@ class _AddPageState extends State<AddPage> {
       } else {
         showError("Update failed: ${response.body}");
       }
-    } 
-    
-    
-    
-    
-    catch (e) {
+    } catch (e) {
       print("Error updating data: $e");
       showError("Something went wrong. Please try again.");
     }

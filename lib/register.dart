@@ -43,80 +43,46 @@ class _LoginState extends State<Register> {
     // int cnt = 0;
     if (username.isEmpty) {
       setState(() {
-        _usernameError="username is required";
-    
+        _usernameError = "username is required";
       });
-    }
-
-      else if (password.isEmpty) {
+    } else if (password.isEmpty) {
       setState(() {
-        _passwordError="password is required";
-    
+        _passwordError = "password is required";
       });
     }
 
     if (username.isNotEmpty && password.isNotEmpty) {
       // bool success = await auth.register(username, password);
 
-      try{
+      try {
+        String responseMessage = await auth.register(username, password);
 
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(responseMessage), // Show the message
 
+            // backgroundColor: result["success"] ? Colors.green : Colors.red, // Set the color
+            backgroundColor: Colors.blue,
+          ),
+        );
 
-        String responseMessage=await auth.register(username, password);
-
-
-
-      
-    //  Map<String,dynamic>result=await auth.register(username, password);
-      // print("success $success");
-      // if (success) {
-      //   ScaffoldMessenger.of(
-      //     context,
-      //   ).showSnackBar(SnackBar(content: Text("Register Sucessful!")));
-      //   // need to do push replacement
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => Login()), // Navigate if valid
-      //   );
-      // } 
-      // else {
-      //   ScaffoldMessenger.of(
-      //     context,
-      //   ).showSnackBar(SnackBar(content: Text("Username is Already Exist!")));
-      // }
-      ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(
-    content: Text(responseMessage), // Show the message
-    // backgroundColor: result["success"] ? Colors.green : Colors.red, // Set the color
-    
-    backgroundColor: Colors.blue,
-  ),
-);
-
-if(responseMessage.toLowerCase().contains("success")){
-  Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Login()),
-      );
-}
-      
-
-    
-
-
-    }
-    catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Unexpected Error"),
-          backgroundColor:Colors.red,
-          
-        ),
-      );
-      
+        if (responseMessage.toLowerCase().contains("success")) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Login()),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Unexpected Error"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
-  }
+
   // Validate Username in real-time
   void _validateUsername(String value) {
     setState(() {
@@ -160,20 +126,6 @@ if(responseMessage.toLowerCase().contains("success")){
           _passwordController.text.isNotEmpty;
     });
   }
-
-  // Login function
-  // void _login() {
-  //   String username=_usernameController.text.trim();
-  //       if (_isValid) {
-  //      _saveUsername(username);// stores username in Hive
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(
-  //         builder: (context) => PostPage(),
-  //       ), // Navigate if valid
-  //     );
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +176,6 @@ if(responseMessage.toLowerCase().contains("success")){
                   border: OutlineInputBorder(),
                 ),
                 onChanged: _validateUsername,
-                
               ),
               SizedBox(height: 20.0),
               TextFormField(
